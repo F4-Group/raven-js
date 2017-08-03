@@ -2367,7 +2367,29 @@ describe('Raven (public API)', function() {
             Raven.captureMessage({});
             assert.isTrue(Raven._send.called);
             assert.deepEqual(Raven._send.lastCall.args, [{
-                message: '[object Object]'
+                message: '{}'
+            }]);
+        });
+
+        it('should convert objects to json', function() {
+            this.sinon.stub(Raven, 'isSetup').returns(true);
+            this.sinon.stub(Raven, '_send');
+            Raven.captureMessage({test: 'error', deep: {foo: 'bar'}});
+            assert.isTrue(Raven._send.called);
+            assert.deepEqual(Raven._send.lastCall.args, [{
+                message: '{"test":"error","deep":"[object Object]"}'
+            }]);
+        });
+
+        it('should not fail on recursive objects', function() {
+            this.sinon.stub(Raven, 'isSetup').returns(true);
+            this.sinon.stub(Raven, '_send');
+            var recursiveOject = {test: 'error', deep: {foo: 'bar'}};
+            recursiveOject.self = recursiveOject;
+            Raven.captureMessage(recursiveOject);
+            assert.isTrue(Raven._send.called);
+            assert.deepEqual(Raven._send.lastCall.args, [{
+                message: '{"test":"error","deep":"[object Object]","self":"[object Object]"}'
             }]);
         });
 
