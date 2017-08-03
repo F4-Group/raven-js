@@ -412,6 +412,14 @@ Raven.prototype = {
 
         options = options || {};
 
+        if(isObject(msg)) {
+            var result = {};
+            for (var key in msg) if(hasKey(msg, key)) {
+                result[key] = String(msg[key]);
+            }
+            msg = JSON.stringify(result);
+        }
+
         var data = objectMerge({
             message: msg + ''  // Make sure it's actually a string
         }, options);
